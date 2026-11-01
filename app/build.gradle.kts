@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.rajaanda.manager"
-    compileSdk = 37
+    compileSdk = 36
     defaultConfig {
         applicationId = "com.rajaanda.manager"
         minSdk = 26
