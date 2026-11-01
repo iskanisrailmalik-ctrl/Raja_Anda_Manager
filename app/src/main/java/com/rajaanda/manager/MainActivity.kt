@@ -44,7 +44,7 @@ data class Sale(val kind: String, val quantity: Int, val amount: Double, val tim
 fun RajaApp() {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("raja_store", 0) }
-    var stock by remember { mutableIntStateOf(prefs.getInt("stock_trays", 0)) }
+    var stock by remember { mutableIntStateOf(prefs.getInt("stock_eggs", 0)) }
     var wholesale by remember { mutableStateOf(prefs.getString("wholesale_price", "200") ?: "200") }
     var retail by remember { mutableStateOf(prefs.getString("retail_price", "8") ?: "8") }
     var purchase by remember { mutableStateOf(prefs.getString("purchase_price", "180") ?: "180") }
@@ -56,7 +56,7 @@ fun RajaApp() {
     var note by remember { mutableStateOf("") }
 
     fun save() {
-        prefs.edit().putInt("stock_trays", stock).putString("wholesale_price", wholesale)
+        prefs.edit().putInt("stock_eggs", stock).putString("wholesale_price", wholesale)
             .putString("retail_price", retail).putString("purchase_price", purchase)
             .putString("sales", salesJson(sales)).apply()
     }
@@ -72,7 +72,7 @@ fun RajaApp() {
                     Text("RAJA ANDA", color = Color.White, fontWeight = FontWeight.Black, style = MaterialTheme.typography.titleLarge)
                     Text("STORE MANAGER  •  HARDI, BAHRAICH", color = Color(0xFFB8D2C6), style = MaterialTheme.typography.labelSmall)
                 }
-                Icon(Icons.Default.Egg, contentDescription = null, tint = Gold, modifier = Modifier.size(30.dp))
+                Icon(Icons.Default.Storefront, contentDescription = null, tint = Gold, modifier = Modifier.size(30.dp))
             }
         },
         bottomBar = {
@@ -90,7 +90,7 @@ fun RajaApp() {
                     Text("Good day 👋", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = Ink)
                     Text("Here is how your shop is doing.", color = Color.Gray)
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        MetricCard("Available stock", "$stock trays", "≈ ${stock * 30} eggs", Modifier.weight(1f))
+                        MetricCard("Available stock", "${stock / 30} trays", "$stock eggs", Modifier.weight(1f))
                         MetricCard("Sales recorded", "₹${money(revenue)}", "${sales.size} transactions", Modifier.weight(1f))
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -114,10 +114,10 @@ fun RajaApp() {
                 }
                 1 -> {
                     Text("Inventory", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = Ink)
-                    MetricCard("Current stock", "$stock trays", "${stock * 30} eggs • ${stock / 7} bundles + ${stock % 7} trays", Modifier.fillMaxWidth())
+                    MetricCard("Current stock", "${stock / 30} trays", "$stock eggs • ${stock / 210} bundles + ${(stock % 210) / 30} trays", Modifier.fillMaxWidth())
                     Button(onClick = { qty = "1"; dialog = "Stock" }, modifier = Modifier.fillMaxWidth()) { Icon(Icons.Default.Add, null); Spacer(Modifier.width(8.dp)); Text("Record stock received") }
                     OutlinedButton(onClick = { qty = "1"; dialog = "Remove" }, modifier = Modifier.fillMaxWidth()) { Icon(Icons.Default.Remove, null); Spacer(Modifier.width(8.dp)); Text("Adjust stock down") }
-                    Text("1 tray = 30 eggs  •  1 bundle = 7 trays", color = Color.Gray)
+                    Text("1 tray = 30 eggs  •  1 bundle = 7 trays. Loose eggs are tracked accurately.", color = Color.Gray)
                 }
                 2 -> {
                     Text("Sales", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = Ink)
@@ -163,10 +163,10 @@ fun RajaApp() {
                     val q = qty.toIntOrNull() ?: 0
                     if (q > 0) {
                         when (dialog) {
-                            "Stock" -> stock += q
-                            "Remove" -> stock = (stock - q).coerceAtLeast(0)
-                            "Wholesale" -> if (q <= stock) { stock -= q; sales = sales + Sale("Wholesale", q, q * (wholesale.toDoubleOrNull() ?: 0.0), now()) }
-                            "Retail" -> if (q <= stock * 30) { stock -= (q + 29) / 30; sales = sales + Sale("Retail", q, q * (retail.toDoubleOrNull() ?: 0.0), now()) }
+                            "Stock" -> stock += q * 30
+                            "Remove" -> stock = (stock - q * 30).coerceAtLeast(0)
+                            "Wholesale" -> if (q * 30 <= stock) { stock -= q * 30; sales = sales + Sale("Wholesale", q, q * (wholesale.toDoubleOrNull() ?: 0.0), now()) }
+                            "Retail" -> if (q <= stock) { stock -= q; sales = sales + Sale("Retail", q, q * (retail.toDoubleOrNull() ?: 0.0), now()) }
                         }
                         save()
                     }
